@@ -12,7 +12,7 @@ pipeline {
                         maven: 'jenkins-maven',
                         // Maven settings.xml file defined with the Jenkins Config File Provider Plugin
                         // Maven settings and global settings can also be defined in Jenkins Global Tools Configuration
-                        mavenSettingsConfig: 'MavenGlobalSettings',
+                        mavenSettingsConfig: '60f738ac-43d1-47e2-b989-fef3e4065709',
                         mavenLocalRepo: '.repository') {
 
                       // Run the maven build
