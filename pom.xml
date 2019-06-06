@@ -61,16 +61,16 @@
 
     <distributionManagement>
         <!-- use the following if you're not using a snapshot version. -->
-<!--        <repository>-->
-<!--            <id>localSnap</id>-->
-<!--            <name>RepositoryProxyRel</name>-->
-<!--            <url>http://127.0.0.1:8080/nexus/content/repositories/releases/</url>-->
-<!--        </repository>-->
+        <repository>
+            <id>dash_maven_releases</id>
+            <name>dash_maven_releases</name>
+            <url>http://35.233.207.231:8081/nexus/content/repositories/dash_maven_releases</url>
+        </repository>
         <!-- use the following if you ARE using a snapshot version. -->
         <snapshotRepository>
-            <id>dash_maven_repo</id>
-            <name>dash_maven_repo</name>
-            <url>http://35.233.207.231:8081/nexus/content/repositories/dash_maven_repo/</url>
+            <id>dash_maven_snapshots</id>
+            <name>dash_maven_snapshots</name>
+            <url>http://35.233.207.231:8081/nexus/content/repositories/dash_maven_repo</url>
         </snapshotRepository>
     </distributionManagement>
 
