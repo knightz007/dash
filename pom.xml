@@ -59,6 +59,11 @@
         </plugins>
     </build>
 
+    <scm>
+        <connection>scm:git:https://github.com/knightz007/dash.git</connection>
+        <developerConnection>scm:git:https://github.com/knightz007/dash.git</developerConnection>
+    </scm>
+
     <distributionManagement>
         <!-- use the following if you're not using a snapshot version. -->
         <repository>
