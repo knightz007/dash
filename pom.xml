@@ -70,7 +70,7 @@
         <snapshotRepository>
             <id>dash_maven_snapshots</id>
             <name>dash_maven_snapshots</name>
-            <url>http://35.233.207.231:8081/nexus/content/repositories/dash_maven_repo</url>
+            <url>http://35.233.207.231:8081/nexus/content/repositories/dash_maven_snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
