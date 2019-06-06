@@ -60,9 +60,18 @@
     </build>
 
     <scm>
-        <connection>scm:git:https://github.com/knightz007/dash.git</connection>
-        <developerConnection>scm:git:https://github.com/knightz007/dash.git</developerConnection>
+        <connection>scm:git:git@github.com:knightz007/dash.git</connection>
+        <developerConnection>scm:git:git@github.com:knightz007/dash.git</developerConnection>
     </scm>
+
+    <developers>
+        <developer>
+            <email>anupkumar.menon@yahoo.com</email>
+            <name>knightz007</name>
+            <url>https://github.com/knightz007/dash</url>
+            <id>knightz007</id>
+        </developer>
+    </developers>
 
     <distributionManagement>
         <!-- use the following if you're not using a snapshot version. -->
