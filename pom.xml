@@ -61,6 +61,7 @@
 
     <scm>
         <connection>scm:git:git@github.com:knightz007/dash.git</connection>
+        <url>scm:git:git@github.com:knightz007/dash.git</url>
         <developerConnection>scm:git:git@github.com:knightz007/dash.git</developerConnection>
     </scm>
 
