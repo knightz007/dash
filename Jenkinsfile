@@ -15,6 +15,7 @@ pipeline {
                         mavenLocalRepo: '.repository') {
 
                       // Run the maven build
+                      sh "mvn --version"
                       sh "mvn clean install"
                  }
 
