@@ -61,7 +61,7 @@
 
     <scm>
         <connection>scm:git:git@github.com:knightz007/dash.git</connection>
-        <url>https://github.com/knightz007/dash</url>
+        <url>https://github.com/knightz007/dash </url>
         <developerConnection>scm:git:git@github.com:knightz007/dash.git</developerConnection>
     </scm>
 
@@ -79,13 +79,13 @@
         <repository>
             <id>dash_maven_releases</id>
             <name>dash_maven_releases</name>
-            <url>http://35.233.207.231:8081/nexus/content/repositories/dash_maven_releases</url>
+            <url>http://35.202.156.106:8081/repository/dash-maven-releases/</url>
         </repository>
         <!-- use the following if you ARE using a snapshot version. -->
         <snapshotRepository>
             <id>dash_maven_snapshots</id>
             <name>dash_maven_snapshots</name>
-            <url>http://35.233.207.231:8081/nexus/content/repositories/dash_maven_snapshots/</url>
+            <url>http://35.202.156.106:8081/repository/dash-maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
