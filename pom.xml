@@ -75,11 +75,10 @@
 
     <distributionManagement>
         <!-- use the following if you're not using a snapshot version. -->
-        <repository>
+          <repository>
             <id>dash_maven_releases</id>
-            <name>dash_maven_releases</name>
             <url>http://35.233.207.231:8081/nexus/content/repositories/dash_maven_releases</url>
-        </repository>
+          </repository>
         <!-- use the following if you ARE using a snapshot version. -->
         <snapshotRepository>
             <id>dash_maven_snapshots</id>
