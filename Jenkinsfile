@@ -1,24 +1,80 @@
 pipeline {
     agent any
-
+    tools {
+        // Note: this should match with the tool name configured in your jenkins instance (JENKINS_URL/configureTools/)
+        maven "jenkins-maven"
+    }
+    environment {
+        // This can be nexus3 or nexus2
+        NEXUS_VERSION = "nexus3"
+        // This can be http or https
+        NEXUS_PROTOCOL = "http"
+        // Where your Nexus is running
+        NEXUS_URL = "35.202.156.106:8081"
+        // Repository where we will upload the artifact
+        NEXUS_REPOSITORY = "dash-mixed"
+        // Jenkins credential id to authenticate to Nexus OSS
+        NEXUS_CREDENTIAL_ID = "nexus-cred"
+    }
     stages {
-
-        stage ('Build') {
+        stage("clone code") {
             steps {
-                echo 'This is very minimal pipeline.'
-                withMaven(
-                        // Maven installation declared in the Jenkins "Global Tool Configuration"
-                        maven: 'jenkins-maven',
-                        // Maven settings.xml file defined with the Jenkins Config File Provider Plugin
-                        // Maven settings and global settings can also be defined in Jenkins Global Tools Configuration
-                        mavenSettingsConfig: '60f738ac-43d1-47e2-b989-fef3e4065709',
-                        mavenLocalRepo: '.repository') {
-
-                      // Run the maven build
-                      sh "mvn --version"
-                      sh "mvn clean install"
-                 }
-
+                script {
+                    // Let's clone the source
+                    sh 'printenv'
+                    git 'https://github.com/knightz007/dash.git';
+                }
+            }
+        }
+        stage("mvn build") {
+            steps {
+                script {
+                    // If you are using Windows then you should use "bat" step
+                    // Since unit testing is out of the scope we skip them
+                    sh "mvn package -DskipTests=true"
+                }
+            }
+        }
+        stage("publish to nexus") {
+            steps {
+                script {
+                    // Read POM xml file using 'readMavenPom' step , this step 'readMavenPom' is included in: https://plugins.jenkins.io/pipeline-utility-steps
+                    pom = readMavenPom file: "pom.xml";
+                    // Find built artifact under target folder
+                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
+                    // Print some info from the artifact found
+                    echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
+                    // Extract the path from the File found
+                    artifactPath = filesByGlob[0].path;
+                    // Assign to a boolean response verifying If the artifact name exists
+                    artifactExists = fileExists artifactPath;
+                    if(artifactExists) {
+                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
+                        nexusArtifactUploader(
+                            nexusVersion: NEXUS_VERSION,
+                            protocol: NEXUS_PROTOCOL,
+                            nexusUrl: NEXUS_URL,
+                            groupId: pom.groupId,
+                            version: pom.version,
+                            repository: NEXUS_REPOSITORY,
+                            credentialsId: NEXUS_CREDENTIAL_ID,
+                            artifacts: [
+                                // Artifact generated such as .jar, .ear and .war files.
+                                [artifactId: pom.artifactId,
+                                classifier: '',
+                                file: artifactPath,
+                                type: pom.packaging],
+                                // Lets upload the pom.xml file for additional information for Transitive dependencies
+                                [artifactId: pom.artifactId,
+                                classifier: '',
+                                file: "pom.xml",
+                                type: "pom"]
+                            ]
+                        );
+                    } else {
+                        error "*** File: ${artifactPath}, could not be found";
+                    }
+                }
             }
         }
     }
