@@ -5,7 +5,7 @@ pipeline {
 
         stage ('Build') {
             steps {
-                echo 'This is asfsf very minimal pipeline.'
+                echo 'This is sfsf very minimal pipeline.'
                 withMaven(
                         // Maven installation declared in the Jenkins "Global Tool Configuration"
                         maven: 'jenkins-maven',
