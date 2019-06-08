@@ -21,10 +21,8 @@ pipeline {
             steps {
                 script {
                     // Let's clone the source
-                  
-                    //git 'https://github.com/knightz007/dash.git';
-                    checkout([$class: 'GitSCM', branches: [[name: '**']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'github-jenkins-user-pass', refspec: '+refs/heads/*:refs/remotes/origin/*', url: 'https://github.com/knightz007/dash.git']]])
-                  sh 'printenv'
+                    sh 'printenv'
+                    git branch: env.BRANCH_NAME , url:'https://github.com/knightz007/dash.git';
                 }
             }
         }
