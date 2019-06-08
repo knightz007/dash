@@ -97,7 +97,7 @@ pipeline {
 
                 sh "ls -ltr ${WORKSPACE}"
                 
-                dir(${WORKSPACE})
+                dir(WORKSPACE)
                 {
                 dockerImage = docker.build("${DOCKER_REGISTRY}:release-${pom.version}_${BUILD_NUMBER}", "-f Dockerfile ./")
                 }
