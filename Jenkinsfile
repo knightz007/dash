@@ -87,6 +87,7 @@ pipeline {
                 pom = readMavenPom file: "pom.xml";
                 artifact = findFiles(glob: "target/*.${pom.packaging}");
                 artifactPath = artifact[0].path;
+                artifactName = artifact[0].name;
 
                 //Get Dockerfile directory
                 dockerfile = findFiles(glob: "Dockerfile")
@@ -99,7 +100,7 @@ pipeline {
                 
                 dir(WORKSPACE)
                 {
-                dockerImage = docker.build("${DOCKER_REGISTRY}:release-${pom.version}_${BUILD_NUMBER}", "-f Dockerfile ./")
+                dockerImage = docker.build("${DOCKER_REGISTRY}:release-${pom.version}_${BUILD_NUMBER}", "--build-arg JAR_FILE=${artifactName}","-f Dockerfile ./")
                 }
             }
           }
