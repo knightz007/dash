@@ -12,6 +12,11 @@ pipeline {
         NEXUS_REPOSITORY = "${(env.BRANCH_NAME).matches('release/(.*)') ? 'dash-maven-releases' : 'dash-maven-snapshots' }"
         // Jenkins credential id to authenticate to Nexus 
         NEXUS_CREDENTIAL_ID = "nexus-cred"
+        // DOCKER registry 
+        DOCKER_REGISTRY = "knights007/spring-boot-cd"
+        //registryCredential 
+        DOCKER_REGISTRY_CREDENTIAL = 'dockerhub-credentials'
+        dockerImage = ''
     }
     stages {
         stage("Clone code") {
@@ -71,5 +76,44 @@ pipeline {
                 }
             }
         }
+
+        stage('Build image') {
+          steps{
+            script {
+                //dockerImage = docker.build registry + ":$BUILD_NUMBER"
+                def dockerfile = 'Dockerfile'
+
+                // Get artifact details from pom
+                pom = readMavenPom file: "pom.xml";
+                artifact = findFiles(glob: "target/*.${pom.packaging}");
+                artifactPath = artifact[0].path;
+
+                //Get Dockerfile directory
+                dockerfile = findFiles(glob: "Dockerfile")
+                dockerfileDirectory = dockerfile[0].directory;
+
+                //sh 'cp /root/workspace/docker-pipeline/target/dash-1.0-SNAPSHOT.jar /root/workspace/docker-pipeline'
+                sh "cp ${artifactPath} ${dockerfileDirectory}"
+                
+                dir(dockerfileDirectory)
+                {
+                dockerImage = docker.build("${DOCKER_REGISTRY}:release-${pom.version}_${BUILD_NUMBER}", "-f Dockerfile ./")
+                }
+            }
+          }
+        }
+
+        stage('Deploy Image') {
+          steps{
+             script 
+                {
+                    docker.withRegistry( '', ${DOCKER_REGISTRY_CREDENTIAL} ) 
+                    {
+                        dockerImage.push()
+                    }
+                }   
+            }        
+        }
+
     }
 }
