@@ -93,9 +93,11 @@ pipeline {
                 dockerfileDirectory = dockerfile[0].directory;
 
                 //sh 'cp /root/workspace/docker-pipeline/target/dash-1.0-SNAPSHOT.jar /root/workspace/docker-pipeline'
-                sh "cp ${artifactPath} ${dockerfileDirectory}"
+                sh "cp ${artifactPath} ${WORKSPACE}"
+
+                sh "ls -ltr ${WORKSPACE}"
                 
-                dir(dockerfileDirectory)
+                dir(${WORKSPACE})
                 {
                 dockerImage = docker.build("${DOCKER_REGISTRY}:release-${pom.version}_${BUILD_NUMBER}", "-f Dockerfile ./")
                 }
