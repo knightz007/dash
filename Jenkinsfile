@@ -82,7 +82,6 @@ pipeline {
             script {
                 //dockerImage = docker.build registry + ":$BUILD_NUMBER"
                 def dockerfile = 'Dockerfile'
-
                 // Get artifact details from pom
                 pom = readMavenPom file: "pom.xml";
                 artifact = findFiles(glob: "target/*.${pom.packaging}");
@@ -92,10 +91,12 @@ pipeline {
 
                 sh "ls -ltr ${WORKSPACE}"
                 
+                //create tag and build image
+                tag = "${pomVersion}_${BUILD_NUMBER}" 
+
                 dir(WORKSPACE)
                 {
-                //tag = env.BRANCH_NAME).matches('release/(.*)') ? 'dash-maven-releases' : 'dash-maven-snapshots' }"
-                dockerImage = docker.build("${DOCKER_REGISTRY}:release-${pomVersion}_${BUILD_NUMBER}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
+                dockerImage = docker.build("${DOCKER_REGISTRY}:${tag}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
                 }
             }
           }
