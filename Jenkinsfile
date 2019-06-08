@@ -5,39 +5,34 @@ pipeline {
         maven "jenkins-maven"
     }
     environment {
-        // This can be nexus3 or nexus2
+        
         NEXUS_VERSION = "nexus3"
-        // This can be http or https
         NEXUS_PROTOCOL = "http"
-        // Where your Nexus is running
         NEXUS_URL = "35.202.156.106:8081"
-        // Repository where we will upload the artifact
-        NEXUS_REPOSITORY = "dash-mixed"
-        // Jenkins credential id to authenticate to Nexus OSS
+        NEXUS_REPOSITORY = "${(env.BRANCH_NAME).matches('release/(.*)') ? 'dash-maven-releases' : 'dash-maven-snapshots' }"
+        // Jenkins credential id to authenticate to Nexus 
         NEXUS_CREDENTIAL_ID = "nexus-cred"
     }
     stages {
-        stage("clone code") {
+        stage("Clone code") {
             steps {
-                script {
-                    // Let's clone the source
+                script {                    
                     sh 'printenv'
                     git branch: env.BRANCH_NAME , url:'https://github.com/knightz007/dash.git';
                 }
             }
         }
-        stage("mvn build") {
+        stage("Maven build") {
             steps {
                 script {
-                    // If you are using Windows then you should use "bat" step
-                    // Since unit testing is out of the scope we skip them
                     sh "mvn package -DskipTests=true"
                 }
             }
         }
-        stage("publish to nexus") {
+        stage("Upload artifacts to Nexus") {
             steps {
                 script {
+
                     // Read POM xml file using 'readMavenPom' step , this step 'readMavenPom' is included in: https://plugins.jenkins.io/pipeline-utility-steps
                     pom = readMavenPom file: "pom.xml";
                     // Find built artifact under target folder
@@ -64,7 +59,6 @@ pipeline {
                                 classifier: '',
                                 file: artifactPath,
                                 type: pom.packaging],
-                                // Lets upload the pom.xml file for additional information for Transitive dependencies
                                 [artifactId: pom.artifactId,
                                 classifier: '',
                                 file: "pom.xml",
