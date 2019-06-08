@@ -13,9 +13,9 @@ pipeline {
         // Jenkins credential id to authenticate to Nexus 
         NEXUS_CREDENTIAL_ID = "nexus-cred"
         // DOCKER registry 
-        DOCKER_REGISTRY = "knights007/spring-boot-cd"
+        docker_registry = "knights007/spring-boot-cd"
         //registryCredential 
-        DOCKER_REGISTRY_CREDENTIAL = 'dockerhub-credentials'
+        docker_registry_credentials = 'dockerhub-credentials'
         dockerImage = ''
     }
     stages {
@@ -100,7 +100,7 @@ pipeline {
                 
                 dir(WORKSPACE)
                 {
-                dockerImage = docker.build("${DOCKER_REGISTRY}:release-${pom.version}_${BUILD_NUMBER}", "--build-arg JAR_FILE=${artifactName}","-f Dockerfile ./")
+                dockerImage = docker.build("$docker_registry:release-${pom.version}_${BUILD_NUMBER}", "--build-arg JAR_FILE=${artifactName}","-f Dockerfile ./")
                 }
             }
           }
@@ -110,7 +110,7 @@ pipeline {
           steps{
              script 
                 {
-                    docker.withRegistry( '', DOCKER_REGISTRY_CREDENTIAL ) 
+                    docker.withRegistry( '', docker_registry_credentials ) 
                     {
                         dockerImage.push()
                     }
