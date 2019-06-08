@@ -22,7 +22,7 @@ pipeline {
                 script {
                     // Let's clone the source
                     sh 'printenv'
-                    git 'https://github.com/knightz007/dash.git';
+                    git branch: env.BRANCH_NAME , url:'https://github.com/knightz007/dash.git';
                 }
             }
         }
