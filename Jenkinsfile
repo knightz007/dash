@@ -13,9 +13,9 @@ pipeline {
         // Jenkins credential id to authenticate to Nexus 
         NEXUS_CREDENTIAL_ID = "nexus-cred"
         // DOCKER registry 
-        docker_registry = "knights007/spring-boot-cd"
+        DOCKER_REGISTRY = "knights007/spring-boot-cd"
         //registryCredential 
-        docker_registry_credentials = 'dockerhub-credentials'
+        DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'
         dockerImage = ''
     }
     stages {
@@ -87,21 +87,15 @@ pipeline {
                 pom = readMavenPom file: "pom.xml";
                 artifact = findFiles(glob: "target/*.${pom.packaging}");
                 artifactPath = artifact[0].path;
-                def artifactName = artifact[0].name;
-                def pomVersion = pom.version;
-
-                //Get Dockerfile directory
-                dockerfile = findFiles(glob: "Dockerfile")
-                dockerfileDirectory = dockerfile[0].directory;
-
-                //sh 'cp /root/workspace/docker-pipeline/target/dash-1.0-SNAPSHOT.jar /root/workspace/docker-pipeline'
-                // sh "cp ${artifactPath} ${WORKSPACE}"
+                //def artifactName = artifact[0].name;
+                pomVersion = pom.version;
 
                 sh "ls -ltr ${WORKSPACE}"
                 
                 dir(WORKSPACE)
                 {
-                dockerImage = docker.build("$docker_registry:release-${pomVersion}_${BUILD_NUMBER}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
+                //tag = env.BRANCH_NAME).matches('release/(.*)') ? 'dash-maven-releases' : 'dash-maven-snapshots' }"
+                dockerImage = docker.build("${DOCKER_REGISTRY}:release-${pomVersion}_${BUILD_NUMBER}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
                 }
             }
           }
@@ -111,7 +105,7 @@ pipeline {
           steps{
              script 
                 {
-                    docker.withRegistry( '', docker_registry_credentials ) 
+                    docker.withRegistry( '', DOCKER_REGISTRY_CREDENTIALS ) 
                     {
                         dockerImage.push()
                     }
