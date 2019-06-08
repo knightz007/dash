@@ -95,13 +95,13 @@ pipeline {
                 dockerfileDirectory = dockerfile[0].directory;
 
                 //sh 'cp /root/workspace/docker-pipeline/target/dash-1.0-SNAPSHOT.jar /root/workspace/docker-pipeline'
-                sh "cp ${artifactPath} ${WORKSPACE}"
+                // sh "cp ${artifactPath} ${WORKSPACE}"
 
                 sh "ls -ltr ${WORKSPACE}"
                 
                 dir(WORKSPACE)
                 {
-                dockerImage = docker.build("$docker_registry:release-${pomVersion}_${BUILD_NUMBER}", "--build-arg JAR_FILE=${artifactName}","-f Dockerfile ./")
+                dockerImage = docker.build("$docker_registry:release-${pomVersion}_${BUILD_NUMBER}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
                 }
             }
           }
