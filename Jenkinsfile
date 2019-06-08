@@ -12,6 +12,11 @@ pipeline {
         NEXUS_REPOSITORY = "${(env.BRANCH_NAME).matches('release/(.*)') ? 'dash-maven-releases' : 'dash-maven-snapshots' }"
         // Jenkins credential id to authenticate to Nexus 
         NEXUS_CREDENTIAL_ID = "nexus-cred"
+        // DOCKER registry 
+        DOCKER_REGISTRY = "knights007/spring-boot-cd"
+        //registryCredential 
+        DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'
+        dockerImage = ''
     }
     stages {
         stage("Clone code") {
@@ -71,5 +76,43 @@ pipeline {
                 }
             }
         }
+
+        stage('Build image') {
+          steps{
+            script {
+                //dockerImage = docker.build registry + ":$BUILD_NUMBER"
+                def dockerfile = 'Dockerfile'
+                // Get artifact details from pom
+                pom = readMavenPom file: "pom.xml";
+                artifact = findFiles(glob: "target/*.${pom.packaging}");
+                artifactPath = artifact[0].path;
+                //def artifactName = artifact[0].name;
+                pomVersion = pom.version;
+
+                sh "ls -ltr ${WORKSPACE}"
+                
+                //create tag and build image
+                tag = "${pomVersion}_${BUILD_NUMBER}" 
+
+                dir(WORKSPACE)
+                {
+                dockerImage = docker.build("${DOCKER_REGISTRY}:${tag}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
+                }
+            }
+          }
+        }
+
+        stage('Deploy Image') {
+          steps{
+             script 
+                {
+                    docker.withRegistry( '', DOCKER_REGISTRY_CREDENTIALS ) 
+                    {
+                        dockerImage.push()
+                    }
+                }   
+            }        
+        }
+
     }
 }
