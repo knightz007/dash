@@ -15,16 +15,22 @@ pipeline {
         DOCKER_REGISTRY = "knights007/spring-boot-cd"
         //registryCredential 
         DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'
-        // dockerImage = ''
-        // dockerImage_tag = ''
-        // helm_home = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
-         DOCKER_IMAGE = ''
-         DOCKER_IMAGE_TAG = ''
-         HELM_HOME = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
-    
+        DOCKER_IMAGE = ''
+        DOCKER_IMAGE_TAG = ''
+        HELM_HOME = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+        
 
     }
     stages {
+
+        stage("Test")
+        {
+            //def dashSvcName = "${namespace}-${env.BUILD_NUMBER}-dash-chart-web-service"
+            def dashSvcName = 'dev-35-dash-chart-web-service'
+            sh("echo http://`kubectl --namespace=dev get service/${dashSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${dashSvcName}")
+            echo "ACCESS URL: http://`cat ${dashSvcName}`:8080/Color.html"
+
+        }
 
         stage("Clone code") {
             steps {
@@ -86,15 +92,13 @@ pipeline {
 
         stage('Build image') {
           steps{
-            script {
-                //dockerImage = docker.build registry + ":$BUILD_NUMBER"
-                def dockerfile = 'Dockerfile'
+            script {                
+                dockerfile = 'Dockerfile'
                 // Get artifact details from pom
                 pom = readMavenPom file: "pom.xml";
-                artifact = findFiles(glob: "target/*.${pom.packaging}");
-                artifactPath = artifact[0].path;
-                //def artifactName = artifact[0].name;
                 pomVersion = pom.version;
+                artifact = findFiles(glob: "target/*.${pom.packaging}");
+                artifactPath = artifact[0].path;  
 
                 sh "ls -ltr ${WORKSPACE}"
                 
@@ -133,8 +137,6 @@ pipeline {
                 git branch: 'master' , url:'https://github.com/knightz007/dash-helm.git';
                 }
 
-                pom = readMavenPom file: "pom.xml"
-                //release = ((int)Float.parseFloat("${pom.version}")).toString();
                 namespace = env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'
 
                 sh """
@@ -146,8 +148,6 @@ pipeline {
                 }
             }
         }
-
-
 
     }
 }
