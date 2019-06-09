@@ -26,8 +26,12 @@ pipeline {
             steps 
             {
                 script 
-                {    
+                { 
+                sh 'mkdir dash-helm'
+                dir('dash-helm')
+                {
                 git branch: 'master' , url:'https://github.com/knightz007/dash-helm.git';
+                }
                 sh "ls -ltr ${WORKSPACE}"
                 sh """
                 ${helm_home}/linux-amd64/helm version
