@@ -28,7 +28,7 @@ pipeline {
                 script 
                 {    
                 git branch: 'master' , url:'https://github.com/knightz007/dash-helm.git';
-
+                sh "ls -ltr ${WORKSPACE}"
                 sh """
                 ${helm_home}/linux-amd64/helm version
                 ${helm_home}/linux-amd64/helm install --debug ./dash-helm --name=release-1 --set namespace.name=dev --namespace dev
