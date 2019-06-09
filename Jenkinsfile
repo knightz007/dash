@@ -18,34 +18,10 @@ pipeline {
         DOCKER_IMAGE = ''
         DOCKER_IMAGE_TAG = ''
         HELM_HOME = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
-        
+        NAMESPACE = env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'
 
     }
     stages {
-
-        stage("Test:- Access url")
-        {
-            steps {
-                script 
-                {
-                    // def dashSvcName = "${namespace}-${env.BUILD_NUMBER}-dash-chart-web-service"
-                    dashSvcName = 'dev-43-dash-chart-web-service'
-                    sh """
-                    #!/bin/bash
-                    external_ip=''
-                    while [ -z \$external_ip ]; do
-                      echo "Waiting for end point..."
-                      external_ip="`kubectl get svc ${dashSvcName} --namespace=dev --template='{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'`"
-                      [ -z "\$external_ip" ] && sleep 10
-                    done
-                    echo 'End point ready:' && echo \$external_ip
-                    """
-
-                    sh("echo `kubectl --namespace=dev get service/${dashSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${dashSvcName}")
-                    sh("echo ACCESS_URL: http://`cat ${dashSvcName}`:8080/Color.html")
-                }
-            }
-        }
 
         stage("Clone code") {
             steps {
@@ -152,19 +128,39 @@ pipeline {
                 git branch: 'master' , url:'https://github.com/knightz007/dash-helm.git';
                 }
 
-                namespace = env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'
-
                 sh """
                 ${HELM_HOME}/linux-amd64/helm version
-                ${HELM_HOME}/linux-amd64/helm ls --all --namespace ${namespace} --short | xargs -L1 ${HELM_HOME}/linux-amd64/helm delete --purge || true
+                ${HELM_HOME}/linux-amd64/helm ls --all --namespace ${NAMESPACE} --short | xargs -L1 ${HELM_HOME}/linux-amd64/helm delete --purge || true
                 sleep 10
-                ${HELM_HOME}/linux-amd64/helm install --debug ./dash-helm --name=${namespace}-${env.BUILD_NUMBER} --set namespace.name=${namespace} --set persistentVolume.pdName=mysql-pd-${namespace} --set deployment.web.image=${DOCKER_REGISTRY} --set deployment.web.tag=${DOCKER_IMAGE_TAG} --namespace ${namespace}
+                ${HELM_HOME}/linux-amd64/helm install --debug ./dash-helm --name=${NAMESPACE}-${env.BUILD_NUMBER} --set namespace.name=${NAMESPACE} --set persistentVolume.pdName=mysql-pd-${NAMESPACE} --set deployment.web.image=${DOCKER_REGISTRY} --set deployment.web.tag=${DOCKER_IMAGE_TAG} --namespace ${NAMESPACE}
                 """
                 }
             }
         }
 
-      
+        stage("QA Test:- Access url")
+        {
+            steps {
+                script 
+                {
+                    def dashSvcName = "${NAMESPACE}-${env.BUILD_NUMBER}-dash-chart-web-service"
+                    
+                    sh """
+                    #!/bin/bash
+                    loadBalancer_ip=''
+                    while [ -z \$loadBalancer_ip ]; do
+                      echo "Waiting for end point..."
+                      loadBalancer_ip="`kubectl get svc ${dashSvcName} --namespace=${NAMESPACE} --template='{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'`"
+                      [ -z "\$external_ip" ] && sleep 10
+                    done
+                    echo 'Load Balancer ip:' && echo \$loadBalancer_ip
+                    """
+
+                    sh("echo `kubectl --namespace=${NAMESPACE} get service/${dashSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${dashSvcName}")
+                    sh("echo ACCESS_URL: http://`cat ${dashSvcName}`:8080/Color.html")
+                }
+            }
+        }      
 
     }
 }
