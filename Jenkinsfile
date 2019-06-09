@@ -25,11 +25,13 @@ pipeline {
 
         stage("Test")
         {
-            //def dashSvcName = "${namespace}-${env.BUILD_NUMBER}-dash-chart-web-service"
-            def dashSvcName = 'dev-35-dash-chart-web-service'
-            sh("echo http://`kubectl --namespace=dev get service/${dashSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${dashSvcName}")
-            echo "ACCESS URL: http://`cat ${dashSvcName}`:8080/Color.html"
-
+            script 
+            {
+                //def dashSvcName = "${namespace}-${env.BUILD_NUMBER}-dash-chart-web-service"
+                def dashSvcName = 'dev-35-dash-chart-web-service'
+                sh("echo http://`kubectl --namespace=dev get service/${dashSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${dashSvcName}")
+                echo "ACCESS URL: http://`cat ${dashSvcName}`:8080/Color.html"
+            }
         }
 
         stage("Clone code") {
