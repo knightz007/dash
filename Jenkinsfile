@@ -26,7 +26,7 @@ pipeline {
             {
                 script 
                 {    
-                ${helm_home}/linux-amd64/helm version
+                sh "${helm_home}/linux-amd64/helm version"
                 }
             }
         }
