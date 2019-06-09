@@ -27,7 +27,7 @@ pipeline {
             {
                 script 
                 {    
-                git branch: master , url:'https://github.com/knightz007/dash-helm.git';
+                git branch: 'master' , url:'https://github.com/knightz007/dash-helm.git';
 
                 sh """
                 ${helm_home}/linux-amd64/helm version"
