@@ -17,8 +17,20 @@ pipeline {
         //registryCredential 
         DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'
         dockerImage = ''
+        helm_home = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
     }
     stages {
+        stage("Helm Version")
+        {
+            steps 
+            {
+                script 
+                {    
+                ${helm_home}/linux-amd64/helm version
+                }
+            }
+        }
+
         stage("Clone code") {
             steps {
                 script {                    
