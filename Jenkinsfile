@@ -35,7 +35,7 @@ pipeline {
                 sh "ls -ltr ${WORKSPACE}"
                 sh """
                 ${helm_home}/linux-amd64/helm version
-                ${helm_home}/linux-amd64/helm ls --all --namespace dev --short | xargs -L1 helm delete --purge || true
+                ${helm_home}/linux-amd64/helm ls --all --namespace dev --short | xargs -L1 ${helm_home}/linux-amd64/helm delete --purge || true
                 sleep 10
                 ${helm_home}/linux-amd64/helm install --debug ./dash-helm --name=release-1 --set namespace.name=dev --namespace dev
 
