@@ -147,7 +147,8 @@ pipeline {
                 {
                     def dashSvcName = "${namespace}-${env.BUILD_NUMBER}-dash-chart-web-service"
                     //sh("external_ip=''; while [ -z $external_ip ]; do echo 'Waiting for end point...'; external_ip=`kubectl get svc ${dashSvcName} --template={{range .status.loadBalancer.ingress}}{{.ip}}{{end}}` [ -z $external_ip ] && sleep 10; done; echo 'End point ready-' && echo $external_ip; export endpoint=$external_ip")
-                    sh """
+                    bash '''
+                    #!/bin/bash
                     external_ip=''
                     while [ -z $external_ip ]; do
                       echo "Waiting for end point..."
@@ -155,7 +156,7 @@ pipeline {
                       [ -z "$external_ip" ] && sleep 10
                     done
                     echo 'End point ready:' && echo $external_ip
-                    """
+                    '''
 
                     sh("echo `kubectl --namespace=dev get service/${dashSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${dashSvcName}")
                     sh("echo ACCESS_URL: http://`cat ${dashSvcName}`:8080/Color.html")
