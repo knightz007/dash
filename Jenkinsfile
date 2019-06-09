@@ -17,6 +17,7 @@ pipeline {
         //registryCredential 
         DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'
         dockerImage = ''
+        dockerImage_tag = ''
         helm_home = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
     }
     stages {
@@ -94,11 +95,11 @@ pipeline {
                 sh "ls -ltr ${WORKSPACE}"
                 
                 //create tag and build image
-                tag = "${pomVersion}_${BUILD_NUMBER}" 
+                dockerImage_tag = "${pomVersion}_${BUILD_NUMBER}" 
 
                 dir(WORKSPACE)
                 {
-                dockerImage = docker.build("${DOCKER_REGISTRY}:${tag}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
+                dockerImage = docker.build("${DOCKER_REGISTRY}:${dockerImage_tag}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
                 }
             }
           }
@@ -136,7 +137,7 @@ pipeline {
                 ${helm_home}/linux-amd64/helm version
                 ${helm_home}/linux-amd64/helm ls --all --namespace ${namespace} --short | xargs -L1 ${helm_home}/linux-amd64/helm delete --purge || true
                 sleep 10
-                ${helm_home}/linux-amd64/helm install --debug ./dash-helm --name=${namespace}-${env.BUILD_NUMBER} --set namespace.name=${namespace} --set persistentVolume.pdName=mysql-pd-${namespace} --set deployment.web.image=${dockerImage} --namespace ${namespace}
+                ${helm_home}/linux-amd64/helm install --debug ./dash-helm --name=${namespace}-${env.BUILD_NUMBER} --set namespace.name=${namespace} --set persistentVolume.pdName=mysql-pd-${namespace} --set deployment.web.image=${DOCKER_REGISTRY}:${dockerImage_tag} --namespace ${namespace}
                 """
                 }
             }
