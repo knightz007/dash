@@ -33,12 +33,12 @@ pipeline {
                     sh """
                     #!/bin/bash
                     external_ip=''
-                    while [ -z $external_ip ]; do
+                    while [ -z \$external_ip ]; do
                       echo "Waiting for end point..."
                       external_ip="`kubectl get svc ${dashSvcName} --template={{range .status.loadBalancer.ingress}}{{.ip}}{{end}}`"
-                      [ -z "$external_ip" ] && sleep 10
+                      [ -z "\$external_ip" ] && sleep 10
                     done
-                    echo 'End point ready:' && echo $external_ip
+                    echo 'End point ready:' && echo \$external_ip
                     """
 
                     sh("echo `kubectl --namespace=dev get service/${dashSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${dashSvcName}")
