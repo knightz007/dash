@@ -20,13 +20,21 @@ pipeline {
         helm_home = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
     }
     stages {
-        stage("Helm Version")
+
+        stage("Helm install")
         {
             steps 
             {
                 script 
                 {    
-                sh "${helm_home}/linux-amd64/helm version"
+                git branch: master , url:'https://github.com/knightz007/dash-helm.git';
+
+                sh """
+                ${helm_home}/linux-amd64/helm version"
+                ${helm_home}/linux-amd64/helm ls --all --namespace dev --short | xargs -L1 helm delete --purge || true
+                ${helm_home}/linux-amd64/helm install --debug ./dash-helm --name=release-1 --set namespace.name=dev --namespace dev
+
+                """
                 }
             }
         }
@@ -125,6 +133,8 @@ pipeline {
                 }   
             }        
         }
+
+
 
     }
 }
