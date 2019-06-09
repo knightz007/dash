@@ -1,7 +1,6 @@
 pipeline {
     agent any
     tools {
-        // Note: this should match with the tool name configured in your jenkins instance (JENKINS_URL/configureTools/)
         maven "jenkins-maven"
     }
     environment {
@@ -16,9 +15,11 @@ pipeline {
         DOCKER_REGISTRY = "knights007/spring-boot-cd"
         //registryCredential 
         DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'
-        dockerImage = ''
-        dockerImage_tag = ''
-        helm_home = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+        DOCKER_IMAGE = ''
+        DOCKER_IMAGE_TAG = ''
+        HELM_HOME = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+        NAMESPACE = "${env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'}"
+
     }
     stages {
 
@@ -82,24 +83,22 @@ pipeline {
 
         stage('Build image') {
           steps{
-            script {
-                //dockerImage = docker.build registry + ":$BUILD_NUMBER"
-                def dockerfile = 'Dockerfile'
+            script {                
+                dockerfile = 'Dockerfile'
                 // Get artifact details from pom
                 pom = readMavenPom file: "pom.xml";
-                artifact = findFiles(glob: "target/*.${pom.packaging}");
-                artifactPath = artifact[0].path;
-                //def artifactName = artifact[0].name;
                 pomVersion = pom.version;
+                artifact = findFiles(glob: "target/*.${pom.packaging}");
+                artifactPath = artifact[0].path;  
 
                 sh "ls -ltr ${WORKSPACE}"
                 
                 //create tag and build image
-                dockerImage_tag = "${pomVersion}_${BUILD_NUMBER}" 
+                DOCKER_IMAGE_TAG = "${pomVersion}_${BUILD_NUMBER}" 
 
                 dir(WORKSPACE)
                 {
-                dockerImage = docker.build("${DOCKER_REGISTRY}:${dockerImage_tag}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
+                DOCKER_IMAGE = docker.build("${DOCKER_REGISTRY}:${DOCKER_IMAGE_TAG}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
                 }
             }
           }
@@ -111,7 +110,7 @@ pipeline {
                 {
                     docker.withRegistry( '', DOCKER_REGISTRY_CREDENTIALS ) 
                     {
-                        dockerImage.push()
+                        DOCKER_IMAGE.push()
                     }
                 }   
             }        
@@ -129,21 +128,39 @@ pipeline {
                 git branch: 'master' , url:'https://github.com/knightz007/dash-helm.git';
                 }
 
-                pom = readMavenPom file: "pom.xml"
-                //release = ((int)Float.parseFloat("${pom.version}")).toString();
-                namespace = env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'
-
                 sh """
-                ${helm_home}/linux-amd64/helm version
-                ${helm_home}/linux-amd64/helm ls --all --namespace ${namespace} --short | xargs -L1 ${helm_home}/linux-amd64/helm delete --purge || true
+                ${HELM_HOME}/linux-amd64/helm version
+                ${HELM_HOME}/linux-amd64/helm ls --all --namespace ${NAMESPACE} --short | xargs -L1 ${HELM_HOME}/linux-amd64/helm delete --purge || true
                 sleep 10
-                ${helm_home}/linux-amd64/helm install --debug ./dash-helm --name=${namespace}-${env.BUILD_NUMBER} --set namespace.name=${namespace} --set persistentVolume.pdName=mysql-pd-${namespace} --set deployment.web.image=${DOCKER_REGISTRY} --set deployment.web.tag=${dockerImage_tag} --namespace ${namespace}
+                ${HELM_HOME}/linux-amd64/helm install --debug ./dash-helm --name=${NAMESPACE}-${env.BUILD_NUMBER} --set namespace.name=${NAMESPACE} --set persistentVolume.pdName=mysql-pd-${NAMESPACE} --set deployment.web.image=${DOCKER_REGISTRY} --set deployment.web.tag=${DOCKER_IMAGE_TAG} --namespace ${NAMESPACE}
                 """
                 }
             }
         }
 
+        stage("QA Test:- Access url")
+        {
+            steps {
+                script 
+                {
+                    def dashSvcName = "${NAMESPACE}-${env.BUILD_NUMBER}-dash-chart-web-service"
+                    
+                    sh """
+                    #!/bin/bash
+                    loadBalancer_ip=''
+                    while [ -z \$loadBalancer_ip ]; do
+                      echo "Waiting for end point..."
+                      loadBalancer_ip="`kubectl get svc ${dashSvcName} --namespace=${NAMESPACE} --template='{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'`"
+                      [ -z "\$external_ip" ] && sleep 10
+                    done
+                    echo 'Load Balancer ip:' && echo \$loadBalancer_ip
+                    """
 
+                    sh("echo `kubectl --namespace=${NAMESPACE} get service/${dashSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${dashSvcName}")
+                    sh("echo ACCESS_URL: http://`cat ${dashSvcName}`:8080/Color.html")
+                }
+            }
+        }      
 
     }
 }
