@@ -18,7 +18,7 @@ pipeline {
         DOCKER_IMAGE = ''
         DOCKER_IMAGE_TAG = ''
         HELM_HOME = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
-        NAMESPACE = env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'
+        NAMESPACE = "${env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'}"
 
     }
     stages {
