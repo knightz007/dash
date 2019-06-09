@@ -23,19 +23,6 @@ pipeline {
     }
     stages {
 
-        stage("Test")
-        {
-            steps {
-                script 
-                {
-                    //def dashSvcName = "${namespace}-${env.BUILD_NUMBER}-dash-chart-web-service"
-                    def dashSvcName = 'dev-38-dash-chart-web-service'
-                    sh("echo http://`kubectl --namespace=dev get service/${dashSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${dashSvcName}")
-                    sh("echo ACCESS_URL: http://`cat ${dashSvcName}`:8080/Color.html")
-                }
-            }
-        }
-
         stage("Clone code") {
             steps {
                 script {                    
@@ -149,6 +136,18 @@ pipeline {
                 sleep 10
                 ${HELM_HOME}/linux-amd64/helm install --debug ./dash-helm --name=${namespace}-${env.BUILD_NUMBER} --set namespace.name=${namespace} --set persistentVolume.pdName=mysql-pd-${namespace} --set deployment.web.image=${DOCKER_REGISTRY} --set deployment.web.tag=${DOCKER_IMAGE_TAG} --namespace ${namespace}
                 """
+                }
+            }
+        }
+
+        stage("Access url")
+        {
+            steps {
+                script 
+                {
+                    def dashSvcName = "${namespace}-${env.BUILD_NUMBER}-dash-chart-web-service"
+                    sh("echo `kubectl --namespace=dev get service/${dashSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${dashSvcName}")
+                    sh("echo ACCESS_URL: http://`cat ${dashSvcName}`:8080/Color.html")
                 }
             }
         }
