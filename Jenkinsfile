@@ -157,7 +157,7 @@ pipeline {
                     """
 
                     sh("echo `kubectl --namespace=${NAMESPACE} get service/${dashSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${dashSvcName}")
-                    sh("echo ACCESS_URL: http://`cat ${dashSvcName}`:8080/Color.html")
+                    sh("echo ACCESS_URL: http://`cat ${dashSvcName}`:8080/color.html")
                 }
             }
         }      
