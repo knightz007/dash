@@ -137,7 +137,6 @@ pipeline {
                 ${helm_home}/linux-amd64/helm ls --all --namespace ${namespace} --short | xargs -L1 ${helm_home}/linux-amd64/helm delete --purge || true
                 sleep 10
                 ${helm_home}/linux-amd64/helm install --debug ./dash-helm --name=${release}_${env.BUILD_NUMBER} --set namespace.name=${namespace} --set persistentVolume.pdName=mysql-pd-${namespace} --namespace ${namespace}
-
                 """
                 }
             }
