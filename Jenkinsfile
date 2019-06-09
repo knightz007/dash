@@ -21,29 +21,6 @@ pipeline {
     }
     stages {
 
-        stage("Helm install")
-        {
-            steps 
-            {
-                script 
-                { 
-                sh 'mkdir dash-helm'
-                dir('dash-helm')
-                {
-                git branch: 'master' , url:'https://github.com/knightz007/dash-helm.git';
-                }
-                sh "ls -ltr ${WORKSPACE}"
-                sh """
-                ${helm_home}/linux-amd64/helm version
-                ${helm_home}/linux-amd64/helm ls --all --namespace dev --short | xargs -L1 ${helm_home}/linux-amd64/helm delete --purge || true
-                sleep 10
-                ${helm_home}/linux-amd64/helm install --debug ./dash-helm --name=release-1 --set namespace.name=dev --namespace dev
-
-                """
-                }
-            }
-        }
-
         stage("Clone code") {
             steps {
                 script {                    
@@ -137,6 +114,33 @@ pipeline {
                     }
                 }   
             }        
+        }
+
+        stage("Helm: Deploy to Kubernetes")
+        {
+            steps 
+            {
+                script 
+                { 
+                sh 'mkdir dash-helm'
+                dir('dash-helm')
+                {
+                git branch: 'master' , url:'https://github.com/knightz007/dash-helm.git';
+                }
+
+                pom = readMavenPom file: "pom.xml"
+                release = ((int)Float.parseFloat("${pom.version}")).toString();
+                namespace = env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'
+
+                sh """
+                ${helm_home}/linux-amd64/helm version
+                ${helm_home}/linux-amd64/helm ls --all --namespace ${namespace} --short | xargs -L1 ${helm_home}/linux-amd64/helm delete --purge || true
+                sleep 10
+                ${helm_home}/linux-amd64/helm install --debug ./dash-helm --name=${release}_${env.} --set namespace.name=${namespace} --set persistentVolume.pdName=mysql-pd-${namespace} --namespace ${namespace}
+
+                """
+                }
+            }
         }
 
 
