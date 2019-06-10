@@ -42,15 +42,15 @@ pipeline {
             steps {
                 script {
 
-                    // Read POM xml file using 'readMavenPom' step , this step 'readMavenPom' is included in: https://plugins.jenkins.io/pipeline-utility-steps
+                    // Read POM xml file using 'readMavenPom'
                     pom = readMavenPom file: "pom.xml";
-                    // Find built artifact under target folder
+                    // Find the artifact in target folder
                     filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
-                    // Print some info from the artifact found
+                    // Print artifact info
                     echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
-                    // Extract the path from the File found
+                    // Extract artifact path
                     artifactPath = filesByGlob[0].path;
-                    // Assign to a boolean response verifying If the artifact name exists
+                    // Check if the artifact name exists
                     artifactExists = fileExists artifactPath;
                     if(artifactExists) {
                         echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
@@ -90,12 +90,12 @@ pipeline {
                 pomVersion = pom.version;
                 artifact = findFiles(glob: "target/*.${pom.packaging}");
                 artifactPath = artifact[0].path;  
-
+                // Pring workspace items
                 sh "ls -ltr ${WORKSPACE}"
                 
-                //create tag and build image
+                //create tag 
                 DOCKER_IMAGE_TAG = "${pomVersion}_${BUILD_NUMBER}" 
-
+                // Build image
                 dir(WORKSPACE)
                 {
                 DOCKER_IMAGE = docker.build("${DOCKER_REGISTRY}:${DOCKER_IMAGE_TAG}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
@@ -122,12 +122,14 @@ pipeline {
             {
                 script 
                 { 
+                // Checkout the helm chart
                 sh 'mkdir dash-helm'
                 dir('dash-helm')
                 {
                 git branch: 'master' , url:'https://github.com/knightz007/dash-helm.git';
                 }
 
+                // Install the helm chart
                 sh """
                 ${HELM_HOME}/linux-amd64/helm version
                 ${HELM_HOME}/linux-amd64/helm ls --all --namespace ${NAMESPACE} --short | xargs -L1 ${HELM_HOME}/linux-amd64/helm delete --purge || true
@@ -142,9 +144,11 @@ pipeline {
         {
             steps {
                 script 
-                {
+                {   
+                    // Form the service name for this build and corresponding namespace
                     def dashSvcName = "${NAMESPACE}-${env.BUILD_NUMBER}-dash-chart-web-service"
                     
+                    // Wait for the load balancer to be ready
                     sh """
                     #!/bin/bash
                     loadBalancer_ip=''
@@ -155,7 +159,7 @@ pipeline {
                     done
                     echo 'Load Balancer ip:' && echo \$loadBalancer_ip
                     """
-
+                    // Print out the load balancer service url
                     sh("echo `kubectl --namespace=${NAMESPACE} get service/${dashSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${dashSvcName}")
                     sh("echo ACCESS_URL: http://`cat ${dashSvcName}`:8080/color.html")
                 }
