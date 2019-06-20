@@ -164,7 +164,6 @@ pipeline {
                     sh("echo ACCESS_URL: http://`cat ${dashSvcName}`:8080/color.html")
                 }
             }
-        }      
-
+        }  
     }
 }
