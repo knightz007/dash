@@ -1,6 +1,4 @@
-FROM openjdk:8-jdk-alpine
-VOLUME /tmp
+FROM knights007/alpine-jdk:latest
 ARG JAR_FILE
 COPY ${JAR_FILE} /opt/app.jar
-# COPY dash-1.0-SNAPSHOT.jar /opt/app.jar
 ENTRYPOINT ["java","-Dspring.profiles.active=docker","-jar","/opt/app.jar"]
