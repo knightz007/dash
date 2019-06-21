@@ -19,7 +19,7 @@ pipeline {
         DOCKER_IMAGE_TAG = ''
         HELM_HOME = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
         NAMESPACE = "${env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'}"
-
+        ANCHORE_ENGINE_URL='http://35.197.41.37:8228/v1'
     }
     stages {
 
@@ -81,7 +81,7 @@ pipeline {
             }
         }
 
-        stage('Build image') {
+        stage('Build Docker image') {
           steps{
             script {                
                 dockerfile = 'Dockerfile'
@@ -104,7 +104,7 @@ pipeline {
           }
         }
 
-        stage('Deploy Image') {
+        stage('Push docker image to DockerHub') {
           steps{
              script 
                 {
@@ -114,6 +114,20 @@ pipeline {
                     }
                 }   
             }        
+        }
+
+        stage("Perform security scan on docker image") 
+        {
+            steps 
+            {
+                script 
+                {
+                    sh """
+                       echo "${DOCKER_REGISTRY}:${DOCKER_IMAGE_TAG}" > anchore_images
+                    """
+                    anchore autoSubscribeTagUpdates: false, engineCredentialsId: 'anchore-cred', engineurl: ANCHORE_ENGINE_URL, name: 'anchore_images'
+                }
+            }
         }
 
         stage("Helm: Deploy to Kubernetes")
