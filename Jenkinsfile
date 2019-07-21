@@ -7,7 +7,7 @@ pipeline {
         
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
-        NEXUS_URL = "35.202.156.106:8081"
+        NEXUS_URL = "nexus-web.hopto.org:8081"
         NEXUS_REPOSITORY = "${(env.BRANCH_NAME).matches('release/(.*)') ? 'dash-maven-releases' : 'dash-maven-snapshots' }"
         // Jenkins credential id to authenticate to Nexus 
         NEXUS_CREDENTIAL_ID = "nexus-cred"
@@ -19,7 +19,7 @@ pipeline {
         DOCKER_IMAGE_TAG = ''
         HELM_HOME = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
         NAMESPACE = "${env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'}"
-        ANCHORE_ENGINE_URL='http://35.197.41.37:8228/v1'
+        ANCHORE_ENGINE_URL='http://anchore-web.hopto.org:8228/v1'
     }
     stages {
 
