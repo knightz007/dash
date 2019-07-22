@@ -137,7 +137,7 @@ pipeline {
                 script 
                 { 
                 // Checkout the helm chart
-                sh 'mkdir dash-helm'
+                sh 'mkdir -p dash-helm'
                 dir('dash-helm')
                 {
                 git branch: 'master' , url:'https://github.com/knightz007/dash-helm.git';
