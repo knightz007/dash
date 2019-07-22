@@ -125,7 +125,7 @@ pipeline {
                     sh """
                        echo "${DOCKER_REGISTRY}:${DOCKER_IMAGE_TAG}" > anchore_images
                     """
-                    anchore autoSubscribeTagUpdates: false, engineCredentialsId: 'anchore-cred', engineurl: ANCHORE_ENGINE_URL, name: 'anchore_images'
+                    anchore autoSubscribeTagUpdates: false, engineCredentialsId: 'anchore-cred', engineurl: ANCHORE_ENGINE_URL, name: 'anchore_images', bailOnFail: false
                 }
             }
         }
