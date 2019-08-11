@@ -41,7 +41,6 @@ pipeline {
         stage("Upload artifacts to Nexus") {
             steps {
                 script {
-
                     // Read POM xml file using 'readMavenPom'
                     pom = readMavenPom file: "pom.xml";
                     // Find the artifact in target folder
