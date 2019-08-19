@@ -150,15 +150,15 @@ pipeline {
                 ${HELM_HOME}/linux-amd64/helm install --debug ./dash-helm --name=${NAMESPACE}-${env.BUILD_NUMBER} --set namespace.name=${NAMESPACE} --set persistentVolume.pdName=mysql-pd-${NAMESPACE} --set deployment.web.image=${DOCKER_REGISTRY} --set deployment.web.tag=${DOCKER_IMAGE_TAG} --namespace ${NAMESPACE}
                 """
 
-                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:"user_dbcred_${NAMESPACE}", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                    
+                withCredentials([
+                    usernamePassword(credentialsId: root_dbcred_${NAMESPACE}, usernameVariable: 'ROOT_USERNAME', passwordVariable: 'ROOT_PASSWORD'),
+                    usernamePassword(credentialsId: user_dbcred_${NAMESPACE}, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')
+                ]) {  
                     sh """
                     kubectl delete secret dash-secret1 --namespace ${NAMESPACE}
-                    kubectl create secret generic dash-secret1 --from-literal=username=${USERNAME}  --from-literal=password=${PASSWORD}  --namespace ${NAMESPACE}
+                    kubectl create secret generic dash-secret1 --from-literal=root_password=${ROOT_PASSWORD}  --from-literal=username=${USERNAME}  --from-literal=password=${PASSWORD}  --namespace ${NAMESPACE}
                     """
                     }
-
-
                 }
             }
         }
