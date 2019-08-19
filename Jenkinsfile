@@ -151,8 +151,8 @@ pipeline {
                 """
 
                 withCredentials([
-                    usernamePassword(credentialsId: root_dbcred_${NAMESPACE}, usernameVariable: 'ROOT_USERNAME', passwordVariable: 'ROOT_PASSWORD'),
-                    usernamePassword(credentialsId: user_dbcred_${NAMESPACE}, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')
+                    usernamePassword(credentialsId: "root_dbcred_${NAMESPACE}", usernameVariable: 'ROOT_USERNAME', passwordVariable: 'ROOT_PASSWORD'),
+                    usernamePassword(credentialsId: "user_dbcred_${NAMESPACE}", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')
                 ]) {  
                     sh """
                     kubectl delete secret dash-secret1 --namespace ${NAMESPACE}
