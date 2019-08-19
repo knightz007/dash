@@ -153,7 +153,7 @@ pipeline {
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:"root_dbcred_${NAMESPACE}", usernameVariable: 'ROOT_USERNAME', passwordVariable: 'ROOT_PASSWORD']]) {
                     
                     sh """
-                    kubectl create secret generic dash-secret1 --from-literal=root_password=${ROOT_PASSWORD} --from-literal=username=anup --from-literal=password=anup1 --namespace ${NAMESPACE}
+                    kubectl create secret generic dash-secret1 --from-literal=root_password=${ROOT_PASSWORD} --namespace ${NAMESPACE}
                     """
                     }
 
