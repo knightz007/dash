@@ -17,6 +17,7 @@ pipeline {
         DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'
         DOCKER_IMAGE = ''
         DOCKER_IMAGE_TAG = ''
+        GIT_COMMIT_ID = ''
         HELM_HOME = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
         NAMESPACE = "${env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'}"
         ANCHORE_ENGINE_URL='http://anchore-web.hopto.org:8228/v1'
@@ -28,6 +29,8 @@ pipeline {
                 script {                    
                     sh 'printenv'
                     git branch: env.BRANCH_NAME , url:'https://github.com/knightz007/dash.git';
+                    sh "git rev-parse --short HEAD > .git/commit-id"
+                    GIT_COMMIT_ID = readFile('.git/commit-id').trim()
                 }
             }
         }
@@ -93,7 +96,7 @@ pipeline {
                 sh "ls -ltr ${WORKSPACE}"
                 
                 //create tag 
-                DOCKER_IMAGE_TAG = "${pomVersion}_${BUILD_NUMBER}" 
+                DOCKER_IMAGE_TAG = "${pomVersion}_${GIT_COMMIT_ID}_${BUILD_NUMBER}"
                 // Build image
                 dir(WORKSPACE)
                 {
@@ -147,7 +150,7 @@ pipeline {
                 ${HELM_HOME}/linux-amd64/helm version
                 ${HELM_HOME}/linux-amd64/helm ls --all --namespace ${NAMESPACE} --short | xargs -L1 ${HELM_HOME}/linux-amd64/helm delete --purge || true
                 sleep 10
-                ${HELM_HOME}/linux-amd64/helm install --debug ./dash-helm --name=${NAMESPACE}-${env.BUILD_NUMBER} --set namespace.name=${NAMESPACE} --set persistentVolume.pdName=mysql-pd-${NAMESPACE} --set deployment.web.image=${DOCKER_REGISTRY} --set deployment.web.tag=${DOCKER_IMAGE_TAG} --namespace ${NAMESPACE}
+                ${HELM_HOME}/linux-amd64/helm install --debug ./dash-helm --name=${NAMESPACE}-${env.BUILD_NUMBER}-${GIT_COMMIT_ID} --set namespace.name=${NAMESPACE} --set persistentVolume.pdName=mysql-pd-${NAMESPACE} --set deployment.web.image=${DOCKER_REGISTRY} --set deployment.web.tag=${DOCKER_IMAGE_TAG} --namespace ${NAMESPACE}
                 """
 
                 withCredentials([
@@ -169,7 +172,7 @@ pipeline {
                 script 
                 {   
                     // Form the service name for this build and corresponding namespace
-                    def dashSvcName = "${NAMESPACE}-${env.BUILD_NUMBER}-dash-chart-web-service"
+                    def dashSvcName = "${NAMESPACE}-${env.BUILD_NUMBER}-${GIT_COMMIT_ID}-dash-chart-web-service"
                     
                     // Wait for the load balancer to be ready
                     sh """
