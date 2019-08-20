@@ -158,7 +158,7 @@ pipeline {
                     usernamePassword(credentialsId: "user_dbcred_${NAMESPACE}", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')
                 ]) {  
                     sh """
-                    kubectl delete secret dash-secret1 --namespace ${NAMESPACE}
+                    
                     if [  kubectl delete secret dash-secret1 --namespace ${NAMESPACE} ]; then
                         echo "Deleting existing secrets"
                     else
