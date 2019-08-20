@@ -157,14 +157,9 @@ pipeline {
                     usernamePassword(credentialsId: "root_dbcred_${NAMESPACE}", usernameVariable: 'ROOT_USERNAME', passwordVariable: 'ROOT_PASSWORD'),
                     usernamePassword(credentialsId: "user_dbcred_${NAMESPACE}", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')
                 ]) {  
-                    sh """
-                    
-                    if [  kubectl delete secret dash-secret1 --namespace ${NAMESPACE} ]; then
-                        echo "Deleting existing secrets"
-                    else
-                        break
-                    fi
-
+                    sh """  
+            
+                    trap `kubectl delete secret dash-secret1 --namespace ${NAMESPACE}` ERR
 
                     kubectl create secret generic dash-secret1 --from-literal=root_password=${ROOT_PASSWORD}  --from-literal=username=${USERNAME}  --from-literal=password=${PASSWORD}  --namespace ${NAMESPACE}
                     """
