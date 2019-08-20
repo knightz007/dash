@@ -159,6 +159,13 @@ pipeline {
                 ]) {  
                     sh """
                     kubectl delete secret dash-secret1 --namespace ${NAMESPACE}
+                    if [  kubectl delete secret dash-secret1 --namespace ${NAMESPACE} ]; then
+                        echo "Deleting existing secrets"
+                    else
+                        break
+                    fi
+
+
                     kubectl create secret generic dash-secret1 --from-literal=root_password=${ROOT_PASSWORD}  --from-literal=username=${USERNAME}  --from-literal=password=${PASSWORD}  --namespace ${NAMESPACE}
                     """
                     }
