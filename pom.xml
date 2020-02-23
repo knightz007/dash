@@ -80,13 +80,13 @@
         <repository>
             <id>dash_maven_releases</id>
             <name>dash_maven_releases</name>
-            <url>http://35.202.156.106:8081/repository/dash-maven-releases/</url>
+            <url>http://nexus-web.hopto.org:8080/repository/dash-maven-releases/</url>
         </repository>
         <!-- use the following if you ARE using a snapshot version. -->
         <snapshotRepository>
             <id>dash_maven_snapshots</id>
             <name>dash_maven_snapshots</name>
-            <url>http://35.202.156.106:8081/repository/dash-maven-snapshots/</url>
+            <url>http://nexus-web.hopto.org:8080/repository/dash-maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
