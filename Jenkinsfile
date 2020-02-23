@@ -7,7 +7,7 @@ pipeline {
 
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
-        NEXUS_URL = "35.202.156.106:8081"
+        NEXUS_URL = "nexus-web.hopto.org:8080"
         NEXUS_REPOSITORY = "${(env.BRANCH_NAME).matches('release/(.*)') ? 'dash-maven-releases' : 'dash-maven-snapshots' }"
         // Jenkins credential id to authenticate to Nexus
         NEXUS_CREDENTIAL_ID = "nexus-cred"
