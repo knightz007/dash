@@ -61,7 +61,8 @@ pipeline {
                     {
                         container("docker")
                         {
-                            sh 'docker --version' 
+                            sh 'docker --version'
+                            sh 'sudo service docker restart' 
                         } 
                     }                 
                  }
