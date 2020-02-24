@@ -118,6 +118,8 @@ pipeline {
           steps
           {
             script {
+                container('docker')
+                {
                 dockerfile = 'Dockerfile'
                 // Get artifact details from pom
                 pom = readMavenPom file: "pom.xml";
@@ -135,6 +137,7 @@ pipeline {
                     {
                         DOCKER_IMAGE = docker.build("${DOCKER_REGISTRY}:${DOCKER_IMAGE_TAG}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
                     }
+                }
 
             }
           }
