@@ -10,19 +10,18 @@ pipeline {
                 name: docker
             spec:
               containers:
+              - name: maven
+                image: maven:alpine
+                command:
+                - cat
+                tty: true
               - name: docker
                 image: benhall/dind-jenkins-agent
                 command:
                 - cat
                 tty: true
                 securityContext:
-                  runAsUser: 0
                   privileged: true
-              - name: maven
-                image: maven:alpine
-                command:
-                - cat
-                tty: true
               volumeMounts:
               - mountPath: /var/run/docker.sock
                 name: docker-sock-volume
