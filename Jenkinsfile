@@ -22,6 +22,32 @@ pipeline {
 
     }
     stages {
+        stage("Install Docker") {
+              agent {
+                kubernetes {
+                        yaml """
+                        apiVersion: v1
+                        kind: Pod
+                        metadata:
+                          labels:
+                            name: docker
+                        spec:
+                          containers:
+                          - name: docker
+                            image: docker:latest
+                            command:
+                            - cat
+                            tty: true
+                        """
+                        }
+                    }
+                 steps {
+                    script
+                    {
+                      sh 'docker --version'  
+                    }                 
+                 }
+        }
 
         stage("Clone code") {
             steps {
