@@ -62,7 +62,7 @@ pipeline {
                         container("docker")
                         {
                             sh 'docker --version'
-                            sh 'service docker restart' 
+                            sh 'docker run -ti -v /var/run/docker.sock:/var/run/docker.sock docker' 
                         } 
                     }                 
                  }
