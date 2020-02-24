@@ -111,7 +111,27 @@ pipeline {
         }
 
         stage('Build image') {
-          steps{
+            agent {
+                kubernetes {
+                        yaml """
+                        apiVersion: v1
+                        kind: Pod
+                        metadata:
+                          labels:
+                            name: docker
+                        spec:
+                          containers:
+                          - name: docker
+                            image: docker:latest
+                            command:
+                            - cat
+                            tty: true
+                        """
+                        }
+                    }
+
+          steps
+          {
             script {
                 dockerfile = 'Dockerfile'
                 // Get artifact details from pom
@@ -124,6 +144,8 @@ pipeline {
 
                 //create tag and build image
                 DOCKER_IMAGE_TAG = "${pomVersion}_${BUILD_NUMBER}"
+
+
                 container("docker")
                 {
                     dir(WORKSPACE)
