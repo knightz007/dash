@@ -62,6 +62,7 @@ pipeline {
                         container("docker")
                         {
                             sh 'docker --version'
+                            sh 'ls -la /var/run/docker.sock'
                             sh 'docker images' 
                         } 
                     }                 
