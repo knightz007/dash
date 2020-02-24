@@ -1,5 +1,27 @@
 pipeline {
-    agent any
+  agent {
+    kubernetes {
+            yaml """
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              labels:
+                name: docker
+            spec:
+              containers:
+              - name: docker
+                image: docker:latest
+                command:
+                - cat
+                tty: true
+              - name: maven
+                image: maven:alpine
+                command:
+                - cat
+                tty: true
+            """
+            }
+        }
     tools {
         maven "jenkins-maven"
     }
@@ -23,24 +45,6 @@ pipeline {
     }
     stages {
         stage("Install Docker") {
-              agent {
-                kubernetes {
-                        yaml """
-                        apiVersion: v1
-                        kind: Pod
-                        metadata:
-                          labels:
-                            name: docker
-                        spec:
-                          containers:
-                          - name: docker
-                            image: docker:latest
-                            command:
-                            - cat
-                            tty: true
-                        """
-                        }
-                    }
                  steps {
                     script
                     {
@@ -111,25 +115,6 @@ pipeline {
         }
 
         stage('Build image') {
-            agent {
-                kubernetes {
-                        yaml """
-                        apiVersion: v1
-                        kind: Pod
-                        metadata:
-                          labels:
-                            name: docker
-                        spec:
-                          containers:
-                          - name: docker
-                            image: docker:latest
-                            command:
-                            - cat
-                            tty: true
-                        """
-                        }
-                    }
-
           steps
           {
             script {
@@ -146,13 +131,9 @@ pipeline {
                 DOCKER_IMAGE_TAG = "${pomVersion}_${BUILD_NUMBER}"
 
 
-
                     dir(WORKSPACE)
                     {
-                        container("docker")
-                        {
                         DOCKER_IMAGE = docker.build("${DOCKER_REGISTRY}:${DOCKER_IMAGE_TAG}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
-                        }
                     }
 
             }
