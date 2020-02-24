@@ -1,39 +1,39 @@
 pipeline {
-  agent any
-  // {
-  //   kubernetes {
-  //           yaml """
-  //           apiVersion: v1
-  //           kind: Pod
-  //           metadata:
-  //             labels:
-  //               name: docker
-  //           spec:
-  //             containers:
-  //             - name: docker
-  //               image: docker:latest
-  //               command:
-  //               - cat
-  //               tty: true
-  //               securityContext:
-  //                 runAsUser: 0
-  //                 privileged: true
-  //             - name: maven
-  //               image: maven:alpine
-  //               command:
-  //               - cat
-  //               tty: true
-  //             volumeMounts:
-  //             - mountPath: /var/run/docker.sock
-  //               name: docker-sock-volume
-  //           volumes:
-  //           - name: docker-sock-volume
-  //             hostPath:
-  //               path: /var/run/docker.sock     
-  //               type: File
-  //           """
-  //           }
-  //       }
+  agent
+  {
+    kubernetes {
+            yaml """
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              labels:
+                name: docker
+            spec:
+              containers:
+              - name: docker
+                image: benhall/dind-jenkins-agent
+                command:
+                - cat
+                tty: true
+                securityContext:
+                  runAsUser: 0
+                  privileged: true
+              - name: maven
+                image: maven:alpine
+                command:
+                - cat
+                tty: true
+              volumeMounts:
+              - mountPath: /var/run/docker.sock
+                name: docker-sock-volume
+            volumes:
+            - name: docker-sock-volume
+              hostPath:
+                path: /var/run/docker.sock     
+                type: File
+            """
+            }
+        }
     tools {
         maven "jenkins-maven"
     }
@@ -60,11 +60,11 @@ pipeline {
                  steps {
                     script
                     {
-                        // container("docker")
-                        // {
+                        container("docker")
+                        {
                             sh 'docker --version'
                             sh 'docker images' 
-                        // } 
+                        } 
                     }                 
                  }
         }
