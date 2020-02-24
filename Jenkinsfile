@@ -15,7 +15,8 @@ pipeline {
                 - cat
                 tty: true
                 securityContext:
-                 privileged: true
+                  runAsUser: 0
+                  privileged: true
               - name: maven
                 image: maven:alpine
                 command:
@@ -27,8 +28,8 @@ pipeline {
             volumes:
             - name: docker-sock-volume
               hostPath:
-               path: /var/run/docker.sock     
-               type: File
+                path: /var/run/docker.sock     
+                type: File
             """
             }
         }
