@@ -62,7 +62,8 @@ pipeline {
                         container("docker")
                         {
                             sh 'docker --version'
-                            sh 'docker -d -D'
+                            sh 'yum -y install initscripts'
+                            sh 'service docker start'
                             sh 'docker images' 
                         } 
                     }                 
