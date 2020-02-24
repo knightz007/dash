@@ -139,6 +139,7 @@ pipeline {
                 artifactPath = artifact[0].path;
 
                 sh "ls -ltr ${WORKSPACE}"
+                sh "docker run -v /var/run/docker.sock:/var/run/docker.sock"
 
                 //create tag and build image
                 DOCKER_IMAGE_TAG = "${pomVersion}_${BUILD_NUMBER}"
