@@ -146,13 +146,15 @@ pipeline {
                 DOCKER_IMAGE_TAG = "${pomVersion}_${BUILD_NUMBER}"
 
 
-                container("docker")
-                {
+
                     dir(WORKSPACE)
                     {
-                    DOCKER_IMAGE = docker.build("${DOCKER_REGISTRY}:${DOCKER_IMAGE_TAG}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
+                        container("docker")
+                        {
+                        DOCKER_IMAGE = docker.build("${DOCKER_REGISTRY}:${DOCKER_IMAGE_TAG}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
+                        }
                     }
-                }
+
             }
           }
         }
