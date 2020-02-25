@@ -1,38 +1,37 @@
 pipeline {
-  agent any
-  // {
-  //   kubernetes {
-  //           yaml """
-  //           apiVersion: v1
-  //           kind: Pod
-  //           metadata:
-  //             labels:
-  //               name: docker
-  //           spec:
-  //             containers:
-  //             - name: maven
-  //               image: maven:alpine
-  //               command:
-  //               - cat
-  //               tty: true
-  //             - name: docker
-  //               image: benhall/dind-jenkins-agent
-  //               command:
-  //               - cat
-  //               tty: true
-  //               securityContext:
-  //                 privileged: true
-  //             volumeMounts:
-  //             - mountPath: /var/run/docker.sock
-  //               name: docker-sock-volume
-  //           volumes:
-  //           - name: docker-sock-volume
-  //             hostPath:
-  //               path: /var/run/docker.sock     
-  //               type: File
-  //           """
-  //           }
-  //       }
+  agent 
+  {
+    kubernetes {
+            yaml """
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              labels:
+                name: docker
+            spec:
+              containers:
+              - name: maven
+                image: maven:alpine
+                command:
+                - cat
+                tty: true
+              - name: docker
+                image: nathanielc/docker-client
+                command:
+                - cat
+                tty: true
+                securityContext:
+                  privileged: true
+              volumeMounts:
+              - mountPath: /var/run/docker.sock
+                name: docker-sock-volume
+            volumes:
+            - name: docker-sock-volume
+              hostPath:
+                path: /var/run/docker.sock     
+            """
+            }
+        }
     tools {
         maven "jenkins-maven"
     }
@@ -50,7 +49,7 @@ pipeline {
         DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'
         DOCKER_IMAGE = ''
         DOCKER_IMAGE_TAG = ''
-        HELM_HOME = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+        // HELM_HOME = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
         NAMESPACE = "${env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'}"
 
     }
@@ -59,11 +58,11 @@ pipeline {
                  steps {
                     script
                     {
-                        // container("docker")
-                        // {
+                        container("docker")
+                        {
                             sh 'docker --version'
                             sh 'docker images' 
-                        // } 
+                        } 
                     }                 
                  }
         }
