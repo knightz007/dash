@@ -22,6 +22,7 @@ pipeline {
                 tty: true
                 securityContext:
                   privileged: true
+                  runAsUser: 0
               volumeMounts:
               - mountPath: /var/run/docker.sock
                 name: docker-sock-volume
