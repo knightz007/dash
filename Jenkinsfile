@@ -25,10 +25,15 @@ pipeline {
               volumeMounts:
               - mountPath: /var/run/docker.sock
                 name: docker-sock-volume
+              - mountPath: /usr/bin/docker
+                name: docker-bin
             volumes:
             - name: docker-sock-volume
               hostPath:
-                path: /var/run/docker.sock     
+                path: /var/run/docker.sock 
+            - name: docker-bin
+              hostPath:
+                path: /usr/bin/docker    
             """
             }
         }
