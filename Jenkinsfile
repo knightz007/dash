@@ -1,43 +1,43 @@
 pipeline {
-  agent 
-  {
-    kubernetes {
-            yaml """
-            apiVersion: v1
-            kind: Pod
-            metadata:
-              labels:
-                name: docker
-            spec:
-              containers:
-              - name: maven
-                image: maven:alpine
-                command:
-                - cat
-                tty: true
-              - name: docker
-                image: nathanielc/docker-client
-                command:
-                - cat
-                tty: true
-                securityContext:
-                  privileged: true
-                  runAsUser: 0
-              volumeMounts:
-              - mountPath: /var/run/docker.sock
-                name: docker-sock-volume
-              - mountPath: /usr/bin/docker
-                name: docker-bin
-            volumes:
-            - name: docker-sock-volume
-              hostPath:
-                path: /var/run/docker.sock 
-            - name: docker-bin
-              hostPath:
-                path: /usr/bin/docker    
-            """
-            }
-        }
+  agent any
+  // {
+  //   kubernetes {
+  //           yaml """
+  //           apiVersion: v1
+  //           kind: Pod
+  //           metadata:
+  //             labels:
+  //               name: docker
+  //           spec:
+  //             containers:
+  //             - name: maven
+  //               image: maven:alpine
+  //               command:
+  //               - cat
+  //               tty: true
+  //             - name: docker
+  //               image: nathanielc/docker-client
+  //               command:
+  //               - cat
+  //               tty: true
+  //               securityContext:
+  //                 privileged: true
+  //                 runAsUser: 0
+  //             volumeMounts:
+  //             - mountPath: /var/run/docker.sock
+  //               name: docker-sock-volume
+  //             - mountPath: /usr/bin/docker
+  //               name: docker-bin
+  //           volumes:
+  //           - name: docker-sock-volume
+  //             hostPath:
+  //               path: /var/run/docker.sock 
+  //           - name: docker-bin
+  //             hostPath:
+  //               path: /usr/bin/docker    
+  //           """
+  //           }
+  //       }
     tools {
         maven "jenkins-maven"
     }
@@ -64,11 +64,11 @@ pipeline {
                  steps {
                     script
                     {
-                        container("docker")
-                        {
+                        // container("docker")
+                        // {
                             sh 'docker --version'
-                            sh 'docker images' 
-                        } 
+                            sh '/usr/bin/docker images' 
+                        // } 
                     }                 
                  }
         }
