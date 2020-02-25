@@ -66,7 +66,7 @@ pipeline {
                     {
                         // container("docker")
                         // {
-                            sh 'docker --version'
+                            // sh 'docker --version'
                             sh '/usr/bin/docker images' 
                         // } 
                     }                 
