@@ -59,11 +59,11 @@ pipeline {
                  steps {
                     script
                     {
-                        container("docker")
-                        {
+                        // container("docker")
+                        // {
                             sh 'docker --version'
                             sh 'docker images' 
-                        } 
+                        // } 
                     }                 
                  }
         }
