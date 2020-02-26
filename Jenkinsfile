@@ -55,9 +55,9 @@ pipeline {
     }
     stages {
         stage("Install Docker") {
-              agent {
-                    label "docker-pod"
-                    }
+              // agent {
+              //       label "docker-pod"
+              //       }
                  steps {
                     script
                     {
