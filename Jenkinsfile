@@ -1,5 +1,5 @@
 pipeline {
-  // agent { label "jenkins-cd-jenkins-slave "}
+  agent { label "jenkins-cd-jenkins-slave"}
   // {
   //   kubernetes {
   //           yaml """
@@ -76,7 +76,6 @@ pipeline {
                     }                 
                  }
         }
-        
 
         stage("Clone code") {
             steps {
