@@ -68,11 +68,8 @@ pipeline {
                  steps {
                     script
                     {
-                        container("docker")
-                        {
                             sh 'docker --version'
-                            //sh 'dbocker images' 
-                        } 
+                            sh 'dbocker images'                    
                     }                 
                  }
         }
