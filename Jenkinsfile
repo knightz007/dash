@@ -1,5 +1,5 @@
 pipeline {
-  agent any
+  agent { label "jenkins-cd-jenkins-slave "}
   // {
   //   kubernetes {
   //           yaml """
@@ -71,7 +71,7 @@ pipeline {
                         container("docker")
                         {
                             // sh 'docker --version'
-                            sh '/usr/bin/docker images' 
+                            sh 'dbocker images' 
                         } 
                     }                 
                  }
