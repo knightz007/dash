@@ -21,7 +21,8 @@ volumes: [
     def NEXUS_VERSION = "nexus3"
     def NEXUS_PROTOCOL = "http"
     def NEXUS_URL = "nexus-web.hopto.org:8080"
-    def NEXUS_REPOSITORY = "${(${env.BRANCH_NAME}).matches('release/(.*)') ? 'dash-maven-releases' : 'dash-maven-snapshots' }"
+    // def NEXUS_REPOSITORY = "${(${env.BRANCH_NAME}).matches('release/(.*)') ? 'dash-maven-releases' : 'dash-maven-snapshots' }"
+    def NEXUS_REPOSITORY = "${env.BRANCH_NAME}".matches('release/(.*)') ? 'dash-maven-releases' : 'dash-maven-snapshots'
     // Jenkins credential id to authenticate to Nexus
     def NEXUS_CREDENTIAL_ID = "nexus-cred"
     // DOCKER registry
