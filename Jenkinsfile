@@ -1,43 +1,36 @@
 pipeline {
-  agent { label "jenkins-cd-jenkins-slave"}
-  // {
-  //   kubernetes {
-  //           yaml """
-  //           apiVersion: v1
-  //           kind: Pod
-  //           metadata:
-  //             labels:
-  //               name: docker
-  //           spec:
-  //             containers:
-  //             - name: maven
-  //               image: maven:alpine
-  //               command:
-  //               - cat
-  //               tty: true
-  //             - name: docker
-  //               image: nathanielc/docker-client
-  //               command:
-  //               - cat
-  //               tty: true
-  //               securityContext:
-  //                 privileged: true
-  //                 runAsUser: 0
-  //             volumeMounts:
-  //             - mountPath: /var/run/docker.sock
-  //               name: docker-sock-volume
-  //             - mountPath: /usr/bin/docker
-  //               name: docker-bin
-  //           volumes:
-  //           - name: docker-sock-volume
-  //             hostPath:
-  //               path: /var/run/docker.sock 
-  //           - name: docker-bin
-  //             hostPath:
-  //               path: /usr/bin/docker    
-  //           """
-  //           }
-  //       }
+  agent 
+  {
+    kubernetes {
+            yaml """
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              labels:
+                name: docker-pod
+            spec:
+              containers:
+              - name: docker
+                image: docker:18.06.3-ce-dind
+                command:
+                tty: true
+                securityContext:
+                  privileged: true
+              volumeMounts:
+              - mountPath: /var/run/docker.sock
+                name: docker-sock-volume
+              - mountPath: /usr/bin/docker
+                name: docker-bin
+            volumes:
+            - name: docker-sock-volume
+              hostPath:
+                path: /var/run/docker.sock 
+            - name: docker-bin
+              hostPath:
+                path: /usr/bin/docker    
+            """
+            }
+        }
 
     tools {
         maven "jenkins-maven"
@@ -63,16 +56,16 @@ pipeline {
     stages {
         stage("Install Docker") {
               agent {
-                    label "pod-dind"
+                    label "docker-pod"
                     }
                  steps {
                     script
                     {
-                        // container("dind")
-                        // {
+                        container("docker")
+                        {
                             sh 'docker --version'
                             sh 'dbocker images' 
-                        // } 
+                        } 
                     }                 
                  }
         }
