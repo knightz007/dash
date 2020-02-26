@@ -17,9 +17,25 @@ volumes: [
     // def shortGitCommit = "${gitCommit[0..10]}"
     // def previousGitCommit = sh(script: "git rev-parse ${gitCommit}~", returnStdout: true)
 
+    def NEXUS_VERSION = "nexus3"
+    def NEXUS_PROTOCOL = "http"
+    def NEXUS_URL = "nexus-web.hopto.org:8080"
+    def NEXUS_REPOSITORY = "${(env.BRANCH_NAME).matches('release/(.*)') ? 'dash-maven-releases' : 'dash-maven-snapshots' }"
+    // Jenkins credential id to authenticate to Nexus
+    def NEXUS_CREDENTIAL_ID = "nexus-cred"
+    // DOCKER registry
+    def DOCKER_REGISTRY = "knights007/spring-boot-cd"
+    //registryCredential
+    def DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'
+    def DOCKER_IMAGE = ''
+    def DOCKER_IMAGE_TAG = ''
+    def HELM_HOME = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+    def NAMESPACE = "${env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'}"
+
     stage('Create Docker images') {
       container('docker') {
         sh "docker images"
+        sh "echo ${DOCKER_REGISTRY}"
       }
     }
     stage('Run kubectl') {
