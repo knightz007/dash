@@ -43,7 +43,7 @@ volumes: [
     }
 
     stage("Upload artifacts to Nexus") {
-
+        container('maven') {
 
                     // Read POM xml file using 'readMavenPom' step , this step 'readMavenPom' is included in: https://plugins.jenkins.io/pipeline-utility-steps
                     pom = readMavenPom file: "pom.xml";
@@ -80,6 +80,7 @@ volumes: [
                     } else {
                         error "*** File: ${artifactPath}, could not be found";
                     }
+                }
 
         }
 
