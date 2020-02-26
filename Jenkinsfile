@@ -1,5 +1,5 @@
 pipeline {
-  agent { label "jenkins-cd-jenkins-slave "}
+  // agent { label "jenkins-cd-jenkins-slave "}
   // {
   //   kubernetes {
   //           yaml """
@@ -68,11 +68,11 @@ pipeline {
                  steps {
                     script
                     {
-                        container("dind")
-                        {
+                        // container("dind")
+                        // {
                             sh 'docker --version'
                             sh 'dbocker images' 
-                        } 
+                        // } 
                     }                 
                  }
         }
