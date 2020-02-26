@@ -38,7 +38,7 @@ pipeline {
   //           """
   //           }
   //       }
-  
+
     tools {
         maven "jenkins-maven"
     }
@@ -62,14 +62,17 @@ pipeline {
     }
     stages {
         stage("Install Docker") {
+              agent {
+                    label "pod-dind"
+                    }
                  steps {
                     script
                     {
-                        // container("docker")
-                        // {
+                        container("docker")
+                        {
                             // sh 'docker --version'
                             sh '/usr/bin/docker images' 
-                        // } 
+                        } 
                     }                 
                  }
         }
