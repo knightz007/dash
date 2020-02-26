@@ -70,8 +70,8 @@ pipeline {
                     {
                         container("docker")
                         {
-                            // sh 'docker --version'
-                            sh 'dbocker images' 
+                            sh 'docker --version'
+                            //sh 'dbocker images' 
                         } 
                     }                 
                  }
