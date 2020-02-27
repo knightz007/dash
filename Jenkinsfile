@@ -31,7 +31,7 @@ volumes: [
     def DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'
     def DOCKER_IMAGE = ''
     def DOCKER_IMAGE_TAG = ''
-    // def HELM_HOME = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+    def HELM_HOME = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
     def NAMESPACE = "${env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'}"
 
     stage('Print Nexus repo') {
@@ -124,6 +124,59 @@ volumes: [
           //   }
           // }
         }
+
+        stage('Deploy Image') {
+            container('docker')
+                {
+                    docker.withRegistry( '', DOCKER_REGISTRY_CREDENTIALS )
+                    {
+                        DOCKER_IMAGE.push()
+                    }
+                }            
+        }
+
+        stage("Helm: Deploy to Kubernetes")
+        {
+            container('helm')
+            {
+                sh 'mkdir dash-helm'
+                dir('dash-helm')
+                {
+                git branch: 'master' , url:'https://github.com/knightz007/dash-helm.git';
+                }
+
+                sh """
+                ${HELM_HOME}/linux-amd64/helm version
+                ${HELM_HOME}/linux-amd64/helm ls --all --namespace ${NAMESPACE} --short | xargs -L1 ${HELM_HOME}/linux-amd64/helm delete --purge || true
+                sleep 10
+                ${HELM_HOME}/linux-amd64/helm install --debug ./dash-helm --name=${NAMESPACE}-${env.BUILD_NUMBER} --set namespace.name=${NAMESPACE} --set persistentVolume.pdName=mysql-pd-${NAMESPACE} --set deployment.web.image=${DOCKER_REGISTRY} --set deployment.web.tag=${DOCKER_IMAGE_TAG} --namespace ${NAMESPACE}
+                """
+            }            
+        }
+
+        stage("QA Test:- Access url")
+        {
+            container('kubectl')
+            {
+                    def dashSvcName = "${NAMESPACE}-${env.BUILD_NUMBER}-dash-chart-web-service"
+
+                    sh """
+                    #!/bin/bash
+                    loadBalancer_ip=''
+                    while [ -z \$loadBalancer_ip ]; do
+                      echo "Waiting for end point..."
+                      loadBalancer_ip="`kubectl get svc ${dashSvcName} --namespace=${NAMESPACE} --template='{{range .status.loadBalancer.ingress}}{{.ip}}{{end}}'`"
+                      [ -z "\$external_ip" ] && sleep 10
+                    done
+                    echo 'Load Balancer ip:' && echo \$loadBalancer_ip
+                    """
+
+                    sh("echo `kubectl --namespace=${NAMESPACE} get service/${dashSvcName} --output=json | jq -r '.status.loadBalancer.ingress[0].ip'` > ${dashSvcName}")
+                    sh("echo ACCESS_URL: http://`cat ${dashSvcName}`:8080/Color.html")
+                
+            }
+        }
+
 
     // stage('Create Docker images') {
     //   container('docker') {
