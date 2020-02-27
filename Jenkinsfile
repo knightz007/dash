@@ -44,7 +44,7 @@ volumes: [
     }
 
     stage('Get a Maven project') {
-        git 'https://github.com/knightz007/dash.git'
+        git branch: env.BRANCH_NAME , url:'https://github.com/knightz007/dash.git';
         container('maven') {
             stage('Maven Build') {
                 sh 'mvn package -DskipTests=true'
@@ -92,6 +92,37 @@ volumes: [
                     }
                 }
 
+        }
+
+        stage('Build image') {
+          // steps
+          // {
+          //   script {
+                // container('maven')
+                // {
+                    dockerfile = 'Dockerfile'
+                    // Get artifact details from pom
+                    pom = readMavenPom file: "pom.xml";
+                    pomVersion = pom.version;
+                    artifact = findFiles(glob: "target/*.${pom.packaging}");
+                    artifactPath = artifact[0].path;
+
+                    sh "ls -ltr ${WORKSPACE}"
+
+                    //create tag and build image
+                    DOCKER_IMAGE_TAG = "${pomVersion}_${BUILD_NUMBER}"
+                // }
+
+                container('docker')
+                {
+                    dir(WORKSPACE)
+                    {
+                        DOCKER_IMAGE = docker.build("${DOCKER_REGISTRY}:${DOCKER_IMAGE_TAG}", "--build-arg JAR_FILE=${artifactPath} -f Dockerfile ./")
+                    }
+                }
+
+          //   }
+          // }
         }
 
     // stage('Create Docker images') {
