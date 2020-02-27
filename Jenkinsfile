@@ -40,7 +40,7 @@ volumes: [
         //     stage('Maven Build') {
         //         sh 'mvn package -DskipTests=true'
         //     }
-        }
+        // }
     }
 
     // stage('Get a Maven project') {
