@@ -137,14 +137,14 @@ volumes: [
 
         stage("Helm: Deploy to Kubernetes")
         {
-            container('helm')
-            {
+
                 sh 'mkdir dash-helm'
                 dir('dash-helm')
                 {
                 git branch: 'master' , url:'https://github.com/knightz007/dash-helm.git';
                 }
-
+                container('helm')
+                {
                 sh """
                 ${HELM_HOME}/linux-amd64/helm version
                 ${HELM_HOME}/linux-amd64/helm ls --all --namespace ${NAMESPACE} --short | xargs -L1 ${HELM_HOME}/linux-amd64/helm delete --purge || true
