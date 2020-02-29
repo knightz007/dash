@@ -33,6 +33,7 @@ volumes: [
     def DOCKER_IMAGE_TAG = ''
     def HELM_HOME = tool name: 'helm-jenkins', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
     def NAMESPACE = "${env.BRANCH_NAME.matches('release/(.*)') ? 'prod' : 'dev'}"
+    def ANCHORE_ENGINE_URL='http://anchore-web.hopto.org:8228/v1'
 
     stage('Print Nexus repo') {
         sh "echo ${NEXUS_REPOSITORY}"
@@ -137,13 +138,13 @@ volumes: [
 
         stage("Perform security scan on docker image")
         {
-             container(docker)
-                {
+//              container(docker)
+//                 {
                     sh """
                        echo "${DOCKER_REGISTRY}:${DOCKER_IMAGE_TAG}" > anchore_images
                     """
                     anchore autoSubscribeTagUpdates: false, engineCredentialsId: 'anchore-cred', engineurl: ANCHORE_ENGINE_URL, name: 'anchore_images', bailOnFail: false
-                }
+//                 }
         }
 
 
