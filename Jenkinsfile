@@ -139,6 +139,7 @@ volumes: [
 
         stage('Perform security scan on docker image')
         {
+
 //              container('anchore')
 //                 {
                     sh """
