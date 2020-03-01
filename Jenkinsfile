@@ -6,6 +6,7 @@ podTemplate(label: label, containers: [
   containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true),
   containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.8.8', command: 'cat', ttyEnabled: true),
   containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:latest', command: 'cat', ttyEnabled: true)
+  containerTemplate(name: 'anchore', image: 'anchore/engine-cli', command: 'cat', ttyEnabled: true)
 ],
 volumes: [
   hostPathVolume(mountPath: '/home/gradle/.gradle', hostPath: '/tmp/jenkins/.gradle'),
@@ -136,14 +137,17 @@ volumes: [
                 }            
         }
 
-        stage("Perform security scan on docker image")
+        stage('Perform security scan on docker image')
         {
-//              container(docker)
+//              container('anchore')
 //                 {
                     sh """
                        echo "${DOCKER_REGISTRY}:${DOCKER_IMAGE_TAG}" > anchore_images
                     """
                     anchore autoSubscribeTagUpdates: false, engineCredentialsId: 'anchore-cred', engineurl: ANCHORE_ENGINE_URL, name: 'anchore_images', bailOnFail: false
+
+//                        anchore-cli image add ${DOCKER_REGISTRY}:${DOCKER_IMAGE_TAG}
+//                        anchore-cli evaluate check ${DOCKER_REGISTRY}:${DOCKER_IMAGE_TAG}
 //                 }
         }
 
